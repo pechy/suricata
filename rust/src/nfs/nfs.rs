@@ -95,6 +95,7 @@ pub static mut SURICATA_NFS3_FILE_CONFIG: Option<&'static SuricataFileContext> =
 #[repr(u32)]
 pub enum NFSEvent {
     MalformedData = 0,
+    Test,
 }
 
 #[derive(Debug)]
