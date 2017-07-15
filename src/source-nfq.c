@@ -426,12 +426,20 @@ int NFQSetupPkt (Packet *p, struct nfq_q_handle *qh, void *data)
     int ret;
     char *pktdata;
     struct nfqnl_msg_packet_hdr *ph;
+    struct nfqnl_msg_packet_hw *hwaddr;
 
     ph = nfq_get_msg_packet_hdr(tb);
     if (ph != NULL) {
         p->nfq_v.id = ntohl(ph->packet_id);
         //p->nfq_v.hw_protocol = ntohs(p->nfq_v.ph->hw_protocol);
         p->nfq_v.hw_protocol = ph->hw_protocol;
+    }
+    hwaddr = nfq_get_packet_hw(tb);
+    if (hwaddr != NULL) {
+        p->nfq_v.hw_address_known = 1;
+        memcpy(p->nfq_v.hw_address, hwaddr->hw_addr, 6);
+    } else {
+        p->nfq_v.hw_address_known = 0;
     }
     /* coverity[missing_lock] */
     p->nfq_v.mark = nfq_get_nfmark(tb);
