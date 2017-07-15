@@ -270,37 +270,46 @@ json_t *CreateJSONHeader(const Packet *p, int direction_sensitive,
             break;
     }
 
-    if (p->ethh) {
+    if (p->ethh
+#ifdef NFQ
+        || (p->flow && (p->flow->hw_address_src_known || p->flow->hw_address_dst_known))
+#endif
+    ) {
         json_t *ejs = json_object();
         if (ejs != NULL) {
             char eth_addr[19];
-            uint8_t *src, *dst;
+            const uint8_t *src=NULL, *dst=NULL;
 
-            if ((PKT_IS_TOSERVER(p))) {
-                src = p->ethh->eth_dst;
-                dst = p->ethh->eth_src;
-            } else {
+            if (p->ethh) {
                 src = p->ethh->eth_src;
                 dst = p->ethh->eth_dst;
             }
-
-            json_object_set_new(ejs, "type", json_integer(ntohs(p->ethh->eth_type)));
-            snprintf(eth_addr, 19, "%02x:%02x:%02x:%02x:%02x:%02x",
-                    src[0],
-                    src[1],
-                    src[2],
-                    src[3],
-                    src[4],
-                    src[5]);
-            json_object_set_new(ejs, "src", json_string(eth_addr));
-            snprintf(eth_addr, 19, "%02x:%02x:%02x:%02x:%02x:%02x",
-                    dst[0],
-                    dst[1],
-                    dst[2],
-                    dst[3],
-                    dst[4],
-                    dst[5]);
-            json_object_set_new(ejs, "dst", json_string(eth_addr));
+#ifdef NFQ
+            else {
+                if (p->flow->hw_address_src_known) src=p->flow->hw_address_src;
+                if (p->flow->hw_address_dst_known) dst=p->flow->hw_address_dst;
+            }
+#endif
+            if (src) {
+                snprintf(eth_addr, 19, "%02x:%02x:%02x:%02x:%02x:%02x",
+                        src[0],
+                        src[1],
+                        src[2],
+                        src[3],
+                        src[4],
+                        src[5]);
+                json_object_set_new(ejs, "src", json_string(eth_addr));
+            }
+            if (dst) {
+                snprintf(eth_addr, 19, "%02x:%02x:%02x:%02x:%02x:%02x",
+                        dst[0],
+                        dst[1],
+                        dst[2],
+                        dst[3],
+                        dst[4],
+                        dst[5]);
+                json_object_set_new(ejs, "dst", json_string(eth_addr));
+            }
             json_object_set_new(js, "ether", ejs);
         }
     }

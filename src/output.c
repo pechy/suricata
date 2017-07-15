@@ -49,6 +49,7 @@
 #include "output-json-flow.h"
 #include "output-json-netflow.h"
 #include "log-droplog.h"
+#include "output-json-flowstart.h"
 #include "output-json-drop.h"
 #include "log-httplog.h"
 #include "output-json-http.h"
@@ -1051,6 +1052,8 @@ void OutputRegisterLoggers(void)
     AlertSyslogRegister();
     /* unified2 log */
     Unified2AlertRegister();
+    /* flowstart log*/
+    JsonFlowstartLogRegister();
     /* drop log */
     LogDropLogRegister();
     JsonDropLogRegister();
