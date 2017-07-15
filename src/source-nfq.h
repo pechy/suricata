@@ -45,6 +45,8 @@ typedef struct NFQPacketVars_
     uint32_t ifi;
     uint32_t ifo;
     uint16_t hw_protocol;
+    uint8_t hw_address_known;
+    uint8_t hw_address[6];
 } NFQPacketVars;
 
 typedef struct NFQQueueVars_
