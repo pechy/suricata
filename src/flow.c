@@ -309,6 +309,13 @@ void FlowHandlePacketUpdate(Flow *f, Packet *p)
             f->flags &= ~FLOW_PROTO_DETECT_TS_DONE;
             p->flags |= PKT_PROTO_DETECT_TS_DONE;
         }
+#ifdef NFQ
+    if (!f->hw_address_src_known && p->nfq_v.hw_address_known){
+        SCLogInfo("setting src MAC address %02x:%02x:%02x:%02x:%02x:%02x", p->nfq_v.hw_address[0], p->nfq_v.hw_address[1], p->nfq_v.hw_address[2], p->nfq_v.hw_address[3], p->nfq_v.hw_address[4], p->nfq_v.hw_address[5]);
+        f->hw_address_src_known = 1;
+        memcpy(f->hw_address_src, p->nfq_v.hw_address, 6);
+    }
+#endif
     } else {
         f->tosrcpktcnt++;
         f->tosrcbytecnt += GET_PKT_LEN(p);
@@ -324,6 +331,13 @@ void FlowHandlePacketUpdate(Flow *f, Packet *p)
             f->flags &= ~FLOW_PROTO_DETECT_TC_DONE;
             p->flags |= PKT_PROTO_DETECT_TC_DONE;
         }
+#ifdef NFQ
+    if (!f->hw_address_dst_known && p->nfq_v.hw_address_known){
+        SCLogInfo("setting dst MAC address %02x:%02x:%02x:%02x:%02x:%02x", p->nfq_v.hw_address[0], p->nfq_v.hw_address[1], p->nfq_v.hw_address[2], p->nfq_v.hw_address[3], p->nfq_v.hw_address[4], p->nfq_v.hw_address[5]);
+        f->hw_address_dst_known = 1;
+        memcpy(f->hw_address_dst, p->nfq_v.hw_address, 6);
+    }
+#endif
     }
 
     if ((f->flags & (FLOW_TO_DST_SEEN|FLOW_TO_SRC_SEEN)) == (FLOW_TO_DST_SEEN|FLOW_TO_SRC_SEEN)) {
