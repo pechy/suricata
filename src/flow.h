@@ -428,6 +428,12 @@ typedef struct Flow_
     uint32_t tosrcpktcnt;
     uint64_t todstbytecnt;
     uint64_t tosrcbytecnt;
+#ifdef NFQ
+    uint8_t hw_address_src[6];
+    uint8_t hw_address_src_known;
+    uint8_t hw_address_dst[6];
+    uint8_t hw_address_dst_known;
+#endif
 } Flow;
 
 enum FlowState {
