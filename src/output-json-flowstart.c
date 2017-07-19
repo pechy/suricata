@@ -56,6 +56,8 @@
 #include "util-time.h"
 #include "util-buffer.h"
 
+#include <net/if.h> /*if_indextoname*/
+
 #define MODULE_NAME "JsonFlowstartLog"
 
 #ifdef HAVE_LIBJANSSON
@@ -83,7 +85,13 @@ static int FlowstartLogJSON (JsonFlowstartLogThread *aft, const Packet *p)
     json_t *js = CreateJSONHeader((Packet *)p, 0, "flow_start");//TODO const
     if (unlikely(js == NULL))
         return TM_ECODE_OK;
-
+#ifdef NFQ
+    if (p->nfq_v.ifi != 0) {
+        char name[IFNAMSIZ];
+        if_indextoname (p->nfq_v.ifi, name);
+        json_object_set_new(js, "in_dev", json_string(name));
+    }
+#endif /*NFQ*/
     MemBufferReset(aft->buffer);
     OutputJSONBuffer(js, aft->flowstart_ctx->file_ctx, &aft->buffer);
     json_object_clear(js);
